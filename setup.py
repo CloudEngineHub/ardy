@@ -95,9 +95,14 @@ class CMakeBuild(build_ext):
                     )
 
 
+# The motion_correction C++ extension is only needed for the kinematic post-processing
+# path (scripts/generate.py --no-postprocess runs without it). Set
+# ARDY_SKIP_MOTION_CORRECTION=1 to install without a C++ toolchain/CMake.
+_skip_motion_correction = os.environ.get("ARDY_SKIP_MOTION_CORRECTION", "").lower() in ("1", "true", "yes")
+
 setup(
     packages=find_packages(include=["ardy", "ardy.*"]) + ["motion_correction"],
     package_dir={"motion_correction": "MotionCorrection/python/motion_correction"},
-    ext_modules=[CMakeExtension("motion_correction._motion_correction", "MotionCorrection")],
+    ext_modules=[] if _skip_motion_correction else [CMakeExtension("motion_correction._motion_correction", "MotionCorrection")],
     cmdclass={"build_ext": CMakeBuild},
 )
