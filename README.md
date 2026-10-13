@@ -72,6 +72,35 @@ ARDY checkpoints are available trained on various skeletons with differing FPS a
 
 
 
+### Motion Generation Benchmark
+
+ARDY-SOMA-RP-30FPS-Horizon60 is evaluated on the
+[Kimodo Motion Generation Benchmark](https://github.com/nv-tlabs/kimodo#kimodo-motion-generation-benchmark),
+with the test suite built for the Ardy motion representation
+(`create_benchmark.py --motion_rep ardy` in the Kimodo repo: GT motions and root constraint targets
+then use the raw hip trajectory, so the Ground Truth root error is 0 by construction). Full-body
+keyframes condition on joint positions only. These numbers are directly comparable to the
+Kimodo-SOMA-RP-ArdyRep-v1.2 rows in the
+[Kimodo benchmark results](https://github.com/nv-tlabs/kimodo/blob/main/docs/source/benchmark/results.md),
+which are evaluated on the same suite (FID is computed between generated and Ground Truth motions;
+Skate in cm/s; constraint errors in cm).
+
+### Text-Following Evaluation
+
+|  | Overview R@3↑ | Overview FID↓ | Overview Skate↓ | Overview Contact↑ | Timeline single R@3↑ | Timeline single FID↓ | Timeline single Skate↓ | Timeline single Contact↑ | Timeline multi R@3↑ | Timeline multi FID↓ | Timeline multi Skate↓ | Timeline multi Contact↑ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Content** Ground Truth | 88.55 | 0.000 | 1.849 | 1.000 | 86.26 | 0.000 | 1.789 | 1.000 | 88.21 | 0.000 | 1.711 | 1.000 |
+| **Content** ARDY-SOMA-RP-30FPS-Horizon60 | 77.86 | 0.058 | 2.760 | 0.982 | 63.90 | 0.045 | 2.609 | 0.985 | 76.43 | 0.046 | 2.452 | 0.986 |
+| **Repetition** Ground Truth | 93.91 | 0.000 | 2.106 | 1.000 | 89.96 | 0.000 | 2.037 | 1.000 | 94.38 | 0.000 | 1.931 | 1.000 |
+| **Repetition** ARDY-SOMA-RP-30FPS-Horizon60 | 80.50 | 0.023 | 3.444 | 0.975 | 64.50 | 0.025 | 3.366 | 0.979 | 81.28 | 0.020 | 3.243 | 0.978 |
+
+### Constrained Evaluation
+
+|  | With text FB Pos↓ | With text EE Pos↓ | With text 2D Root↓ | With text Pelvis@95% | Without text FB Pos↓ | Without text EE Pos↓ | Without text 2D Root↓ | Without text Pelvis@95% |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Content** ARDY-SOMA-RP-30FPS-Horizon60 | 2.77 | 2.73 | 1.47 | 2.83 | 2.69 | 2.53 | 1.32 | 2.49 |
+| **Repetition** ARDY-SOMA-RP-30FPS-Horizon60 | 2.78 | 2.87 | 1.54 | 3.22 | 2.63 | 2.58 | 1.26 | 2.52 |
+
 ### [Optional] Dataset
 
 Downloading data is only required for running the kinematically constrained generation demos.
