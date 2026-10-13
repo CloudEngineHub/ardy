@@ -29,6 +29,9 @@ MODELS_BY_SKELETON = {
         52: "ARDY-G1-RP-25FPS-Horizon52",
         8: "ARDY-G1-RP-25FPS-Horizon8",
     },
+    "soma": {
+        60: "ARDY-SOMA-RP-30FPS-Horizon60",
+    },
 }
 
 # Horizon a bare skeleton nickname resolves to ("core" -> "core40").
