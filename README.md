@@ -70,37 +70,6 @@ ARDY checkpoints are available trained on various skeletons with differing FPS a
 | **ARDY-G1-RP-25FPS-Horizon8** | Unitree G1 | [Bones Rigplay 1](https://bones.studio/datasets#rp01) | 25 | 8 | July 10, 2026 | [Link](https://huggingface.co/nvidia/ARDY-G1-RP-25FPS-Horizon8) | [NVIDIA Open Model](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-agreement/) |
 | **ARDY-SOMA-RP-30FPS-Horizon60** | [SOMA](https://github.com/NVlabs/SOMA-X) | [Bones Rigplay 1](https://bones.studio/datasets#rp01) | 30 | 60 | October 15, 2026 | [Link](https://huggingface.co/nvidia/ARDY-SOMA-RP-30FPS-Horizon60) | [NVIDIA Open Model](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-agreement/) |
 
-
-
-### Motion Generation Benchmark
-
-ARDY-SOMA-RP-30FPS-Horizon60 is evaluated on the
-[Kimodo Motion Generation Benchmark](https://github.com/nv-tlabs/kimodo#kimodo-motion-generation-benchmark),
-with the test suite built for the Ardy motion representation
-(`create_benchmark.py --motion_rep ardy` in the Kimodo repo: GT motions and root constraint targets
-then use the raw hip trajectory, so the Ground Truth root error is 0 by construction). Full-body
-keyframes condition on joint positions only. These numbers are directly comparable to the
-Kimodo-SOMA-RP-ArdyRep-v1.2 rows in the
-[Kimodo benchmark results](https://github.com/nv-tlabs/kimodo/blob/main/docs/source/benchmark/results.md),
-which are evaluated on the same suite (FID is computed between generated and Ground Truth motions;
-Skate in cm/s; constraint errors in cm).
-
-### Text-Following Evaluation
-
-|  | Overview R@3↑ | Overview FID↓ | Overview Skate↓ | Overview Contact↑ | Timeline single R@3↑ | Timeline single FID↓ | Timeline single Skate↓ | Timeline single Contact↑ | Timeline multi R@3↑ | Timeline multi FID↓ | Timeline multi Skate↓ | Timeline multi Contact↑ |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Content** Ground Truth | 88.55 | 0.000 | 1.849 | 1.000 | 86.26 | 0.000 | 1.789 | 1.000 | 88.21 | 0.000 | 1.711 | 1.000 |
-| **Content** ARDY-SOMA-RP-30FPS-Horizon60 | 77.86 | 0.058 | 2.760 | 0.982 | 63.90 | 0.045 | 2.609 | 0.985 | 76.43 | 0.046 | 2.452 | 0.986 |
-| **Repetition** Ground Truth | 93.91 | 0.000 | 2.106 | 1.000 | 89.96 | 0.000 | 2.037 | 1.000 | 94.38 | 0.000 | 1.931 | 1.000 |
-| **Repetition** ARDY-SOMA-RP-30FPS-Horizon60 | 80.50 | 0.023 | 3.444 | 0.975 | 64.50 | 0.025 | 3.366 | 0.979 | 81.28 | 0.020 | 3.243 | 0.978 |
-
-### Constrained Evaluation
-
-|  | With text FB Pos↓ | With text EE Pos↓ | With text 2D Root↓ | With text Pelvis@95% | Without text FB Pos↓ | Without text EE Pos↓ | Without text 2D Root↓ | Without text Pelvis@95% |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Content** ARDY-SOMA-RP-30FPS-Horizon60 | 2.77 | 2.73 | 1.47 | 2.83 | 2.69 | 2.53 | 1.32 | 2.49 |
-| **Repetition** ARDY-SOMA-RP-30FPS-Horizon60 | 2.78 | 2.87 | 1.54 | 3.22 | 2.63 | 2.58 | 1.26 | 2.52 |
-
 ### [Optional] Dataset
 
 Downloading data is only required for running the kinematically constrained generation demos.
@@ -248,11 +217,11 @@ The interactive demo is a good reference for how ARDY can be used autoregressive
 For non-interactive / batch generation, [`scripts/generate.py`](scripts/generate.py) generates motion from a text prompt and writes it to disk (`.npz`; plus a MuJoCo-qpos `.csv` for G1). Generated files are written to the `outputs/` folder by default.
 
 ```bash
-# Simplest: 5s of motion with the default model, written to outputs/output.npz
-python scripts/generate.py "A person walks in a circle."
+# Simplest: 5s of motion with the SOMA model, written to outputs/output.npz
+python scripts/generate.py "A person walks in a circle." --model soma
 
-# Choose a model + length, and fix the seed for reproducible output (writes outputs/jump.npz)
-python scripts/generate.py "A person jumps." --model core --duration 8.0 --seed 0 --output jump
+# Choose a length, and fix the seed for reproducible output (writes outputs/jump.npz)
+python scripts/generate.py "A person jumps." --model soma --duration 8.0 --seed 0 --output jump
 
 # Multiple samples (writes a folder outputs/waves/ with waves_00.npz, waves_01.npz, ...)
 python scripts/generate.py "A person waves." --model g1 --num_samples 4 --output waves
@@ -273,7 +242,7 @@ Most useful flags:
 
 | Flag | Meaning |
 |------|---------|
-| `--model` | Model nickname `core`/`g1` (optionally with horizon, e.g. `core8`) or full folder name. Default: `core`. |
+| `--model` | Model nickname `soma`/`core`/`g1` (optionally with horizon, e.g. `soma60`, `core8`) or full folder name. Default: `core`. |
 | `--duration` | Length in seconds (default 5.0). |
 | `--num_samples` | Number of samples; when >1, writes a numbered folder. |
 | `--seed` | Fix the random seed for reproducible output. |
@@ -283,6 +252,37 @@ Most useful flags:
 | `--no-postprocess` | Don't apply motion post-processing to reduce foot skating and hit constraints. |
 
 > Tip: if you generate repeatedly, start the standalone text-encoder service in the background first (`python scripts/run_text_encoder_server.py`) so each run connects to it instead of loading the LLM2Vec model in-process every time.
+
+---
+
+## Motion Generation Benchmark
+
+ARDY-SOMA-RP-30FPS-Horizon60 is evaluated on the
+[Kimodo Motion Generation Benchmark](https://github.com/nv-tlabs/kimodo#kimodo-motion-generation-benchmark),
+with the test suite built for the Ardy motion representation
+(`create_benchmark.py --motion_rep ardy` in the Kimodo repo: GT motions and root constraint targets
+then use the raw hip trajectory, so the Ground Truth root error is 0 by construction). Full-body
+keyframes condition on joint positions only. These numbers are directly comparable to the
+Kimodo-SOMA-RP-ArdyRep-v1.2 rows in the
+[Kimodo benchmark results](https://github.com/nv-tlabs/kimodo/blob/main/docs/source/benchmark/results.md),
+which are evaluated on the same suite (FID is computed between generated and Ground Truth motions;
+Skate in cm/s; constraint errors in cm).
+
+### Text-Following Evaluation
+
+|  | Overview R@3↑ | Overview FID↓ | Overview Skate↓ | Overview Contact↑ | Timeline single R@3↑ | Timeline single FID↓ | Timeline single Skate↓ | Timeline single Contact↑ | Timeline multi R@3↑ | Timeline multi FID↓ | Timeline multi Skate↓ | Timeline multi Contact↑ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Content** Ground Truth | 88.55 | 0.000 | 1.849 | 1.000 | 86.26 | 0.000 | 1.789 | 1.000 | 88.21 | 0.000 | 1.711 | 1.000 |
+| **Content** ARDY-SOMA-RP-30FPS-Horizon60 | 77.86 | 0.058 | 2.760 | 0.982 | 63.90 | 0.045 | 2.609 | 0.985 | 76.43 | 0.046 | 2.452 | 0.986 |
+| **Repetition** Ground Truth | 93.91 | 0.000 | 2.106 | 1.000 | 89.96 | 0.000 | 2.037 | 1.000 | 94.38 | 0.000 | 1.931 | 1.000 |
+| **Repetition** ARDY-SOMA-RP-30FPS-Horizon60 | 80.50 | 0.023 | 3.444 | 0.975 | 64.50 | 0.025 | 3.366 | 0.979 | 81.28 | 0.020 | 3.243 | 0.978 |
+
+### Constrained Evaluation
+
+|  | With text FB Pos↓ | With text EE Pos↓ | With text 2D Root↓ | With text Pelvis@95% | Without text FB Pos↓ | Without text EE Pos↓ | Without text 2D Root↓ | Without text Pelvis@95% |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Content** ARDY-SOMA-RP-30FPS-Horizon60 | 2.77 | 2.73 | 1.47 | 2.83 | 2.69 | 2.53 | 1.32 | 2.49 |
+| **Repetition** ARDY-SOMA-RP-30FPS-Horizon60 | 2.78 | 2.87 | 1.54 | 3.22 | 2.63 | 2.58 | 1.26 | 2.52 |
 
 ---
 
