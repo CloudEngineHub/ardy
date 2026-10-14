@@ -65,7 +65,7 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 # When CHECKPOINTS_DIR is set, models are discovered/loaded from that local
 # folder; when unset, the released models are listed and pulled from Hugging Face.
 CHECKPOINTS_DIR = os.environ.get("CHECKPOINTS_DIR")
-DEFAULT_MODEL_DIR = "ARDY-Core-RP-20FPS-Horizon40"
+DEFAULT_MODEL_DIR = "ARDY-SOMA-RP-30FPS-Horizon60"
 
 
 def scan_checkpoint_dirs(base_dir: str = "checkpoints") -> list[str]:

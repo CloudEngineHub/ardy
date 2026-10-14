@@ -20,7 +20,7 @@ class GuiModelMixin:
                 "other": "Other",
             }
             _label_to_skeleton = {v: k for k, v in _skeleton_labels.items()}
-            _skeleton_order = [s for s in ("core", "g1", "soma", "other") if s in _grouped]
+            _skeleton_order = [s for s in ("soma", "core", "g1", "other") if s in _grouped]
             _skeleton_order += [s for s in _grouped if s not in _skeleton_order]
 
             def _default_horizon_label(skeleton: str) -> str:
@@ -28,7 +28,7 @@ class GuiModelMixin:
                 default = str(DEFAULT_HORIZON.get(skeleton, ""))
                 return default if default in labels else labels[0]
 
-            _init_skeleton = "core" if "core" in _grouped else _skeleton_order[0]
+            _init_skeleton = "soma" if "soma" in _grouped else _skeleton_order[0]
             _init_horizon = _default_horizon_label(_init_skeleton)
 
             g.gui_skeleton_dropdown = client.gui.add_dropdown(
