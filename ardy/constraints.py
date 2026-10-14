@@ -98,11 +98,16 @@ class Root2DConstraintSet:
     def from_dict(cls, skeleton: SkeletonBase, dico: dict):
         device = skeleton.device
         root_2d_key = "root_2d" if "root_2d" in dico else "smooth_root_2d"
+        heading = torch.tensor(dico["global_root_heading"]) if "global_root_heading" in dico else None
+        if heading is not None and heading.ndim == 2 and heading.shape[-1] == 2:
+            # Kimodo-built benchmark suites store the heading as (cos, sin) pairs; this class
+            # keeps angles in radians internally.
+            heading = torch.atan2(heading[:, 1], heading[:, 0])
         return cls(
             skeleton,
             frame_indices=torch.tensor(dico["frame_indices"]),
             root_2d=torch.tensor(dico[root_2d_key], device=device),
-            global_root_heading=torch.tensor(dico["global_root_heading"]) if "global_root_heading" in dico else None,
+            global_root_heading=heading,
         )
 
 
