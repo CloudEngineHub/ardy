@@ -263,7 +263,10 @@ class ArdyMotionRep(MotionRepBase):
         if posed_joints_from == "rotations":
             _, posed_joints, _ = fk(local_rot_mats, root_positions, self.skeleton)
         else:
+            # the encoder drops the pelvis row; restore it at the root height (the other rows
+            # already carry the absolute height via the encoder's ground offset)
             dummy_root = torch.zeros_like(local_joints_positions[:, :, [0]])
+            dummy_root[..., 1] = root_positions[..., None, 1]
             posed_joints = torch.cat([dummy_root, local_joints_positions], dim=2)
             posed_joints[..., 0] += root_positions[..., None, 0]
             posed_joints[..., 2] += root_positions[..., None, 2]
