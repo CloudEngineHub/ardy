@@ -378,26 +378,22 @@ class ArdyMotionRep(MotionRepBase):
         )
 
         time_indices = indices_lst[:, 0].contiguous()
-        unique_times = time_indices.unique().contiguous()
-        value_indices = torch.searchsorted(unique_times, time_indices)
-        hips_mask = indices_lst[:, 1] == self.skeleton.root_idx
-        assert hips_mask.sum() == len(unique_times)
-        assert (indices_lst[hips_mask, 0] == unique_times).all()
-
-        root_positions = global_joints_positions[hips_mask][value_indices].clone()
-        root_positions_y = root_positions[:, 1].clone()
 
         root_test = motion_mask[time_indices, self.slice_dict["root_pos"]]
         if not root_test[:, [0, 2]].all():
             raise ValueError("For constraining global positions, root 2D should also be constrained.")
 
-        ground_offset = torch.zeros_like(root_positions)
-        ground_offset[:, 1] = root_positions_y
-        local_joints_positions = global_joints_positions - root_positions + ground_offset
+        # joint positions are stored relative to the ground-projected root: (x, z) relative,
+        # y absolute. The reference is the root 2D already written above (every pose constraint
+        # also constrains the root 2D on its frames), so hands/feet-only constraints work too.
+        local_reference = observed_motion[time_indices, self.slice_dict["root_pos"]].clone()
+        local_reference[:, 1] = 0.0
+        local_joints_positions = global_joints_positions - local_reference
 
+        # the local_joints_positions block excludes the root joint, so drop it and shift indices
         f_sliced = observed_motion[:, self.slice_dict["local_joints_positions"]]
         masking = torch.zeros(len(f_sliced) * (self.nbjoints - 1), 3, device=device, dtype=bool)
-        non_root_mask = ~hips_mask
+        non_root_mask = indices_lst[:, 1] != self.skeleton.root_idx
         indices_lst_no_root = indices_lst[non_root_mask]
         local_joints_positions_no_root = local_joints_positions[non_root_mask]
         masking[indices_lst_no_root[:, 0] * (self.nbjoints - 1) + (indices_lst_no_root[:, 1] - 1)] = True
