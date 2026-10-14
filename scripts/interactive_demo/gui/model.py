@@ -17,10 +17,11 @@ class GuiModelMixin:
                 "core": "Core",
                 "g1": "G1",
                 "soma": "SOMA",
+                "soma-kimodo": "SOMA (KimodoRep)",
                 "other": "Other",
             }
             _label_to_skeleton = {v: k for k, v in _skeleton_labels.items()}
-            _skeleton_order = [s for s in ("soma", "core", "g1", "other") if s in _grouped]
+            _skeleton_order = [s for s in ("soma", "soma-kimodo", "core", "g1", "other") if s in _grouped]
             _skeleton_order += [s for s in _grouped if s not in _skeleton_order]
 
             def _default_horizon_label(skeleton: str) -> str:

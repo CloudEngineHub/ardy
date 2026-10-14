@@ -260,7 +260,7 @@ class MotionIOMixin:
         # Canonicalize: rotate first frame heading to 0 and translate root to origin
         rotated = motion_rep_infer.rotate_to(feats, torch.tensor(0.0, device=device))
         # Translate 2D root to origin manually (avoid ensure_batched conflict)
-        root_pos = rotated[:, :, motion_rep_infer.slice_dict["root_pos"]]
+        root_pos = rotated[:, :, motion_rep_infer.slice_dict[motion_rep_infer.root_pos_name]]
         first_2d = root_pos[:, 0, [0, 2]].clone()
         can_feats = motion_rep_infer.translate_2d(rotated, -first_2d)
         motion = motion_rep_infer.normalize(can_feats).squeeze(0)  # [T, D]
@@ -342,7 +342,9 @@ class MotionIOMixin:
                 current_heading = session.motion_rep.get_root_heading_angle(current_motion_unnorm)[:, 0]  # [1]
 
                 # Extract current 2D root position
-                root_pos = current_motion_unnorm[:, :, session.motion_rep.slice_dict["root_pos"]]  # [1, 1, 3]
+                root_pos = current_motion_unnorm[
+                    :, :, session.motion_rep.slice_dict[session.motion_rep.root_pos_name]
+                ]  # [1, 1, 3]
                 current_root_2d = root_pos[:, 0, [0, 2]]  # [1, 2]
 
                 # Transform loaded motion to match current heading and position

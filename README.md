@@ -69,6 +69,8 @@ ARDY checkpoints are available trained on various skeletons with differing FPS a
 | **ARDY-G1-RP-25FPS-Horizon52** | Unitree G1 | [Bones Rigplay 1](https://bones.studio/datasets#rp01) | 25 | 52 | July 10, 2026 | [Link](https://huggingface.co/nvidia/ARDY-G1-RP-25FPS-Horizon52) | [NVIDIA Open Model](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-agreement/) |
 | **ARDY-G1-RP-25FPS-Horizon8** | Unitree G1 | [Bones Rigplay 1](https://bones.studio/datasets#rp01) | 25 | 8 | July 10, 2026 | [Link](https://huggingface.co/nvidia/ARDY-G1-RP-25FPS-Horizon8) | [NVIDIA Open Model](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-agreement/) |
 | **ARDY-SOMA-RP-30FPS-Horizon60** | [SOMA](https://github.com/NVlabs/SOMA-X) | [Bones Rigplay 1](https://bones.studio/datasets#rp01) | 30 | 60 | October 15, 2026 | [Link](https://huggingface.co/nvidia/ARDY-SOMA-RP-30FPS-Horizon60) | [NVIDIA Open Model](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-agreement/) |
+| **ARDY-SOMA-RP-30FPS-KimodoRep-Horizon60** | [SOMA](https://github.com/NVlabs/SOMA-X) | [Bones Rigplay 1](https://bones.studio/datasets#rp01) | 30 | 60 | October 15, 2026 | [Link](https://huggingface.co/nvidia/ARDY-SOMA-RP-30FPS-KimodoRep-Horizon60) | [NVIDIA Open Model](https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-agreement/) |
+> The *KimodoRep* variant is trained on the Kimodo motion representation (root features relative to a smoothed root trajectory, as used by the Kimodo models) instead of the raw-hips ARDY representation; it pairs with test suites built with `--motion_rep kimodo`.
 
 ### [Optional] Dataset
 
@@ -207,7 +209,7 @@ More detailed information about the interactive demo is available in the [GUI Re
 
 The interactive demo is a good reference for how ARDY can be used autoregressively for realtime applications. The key entry points are:
 
-- **Loading:** [`load_model()`](ardy/model/load_model.py) resolves a checkpoint, builds the model, and attaches the LLM2Vec text encoder (built separately via `load_text_encoder()` so it can be reused across models). Models are referenced by nickname — a skeleton name (`"core"`, `"g1"`, `"soma"`, resolving to that skeleton's default horizon) or skeleton+horizon (`"core8"`, `"g152"`, `"soma60"`) — or by full name (`"ARDY-Core-RP-20FPS-Horizon40"`); see [`ardy/model/registry.py`](ardy/model/registry.py). The demo wires this up in [`ModelLoadingMixin.load_model`](scripts/interactive_demo/loading.py).
+- **Loading:** [`load_model()`](ardy/model/load_model.py) resolves a checkpoint, builds the model, and attaches the LLM2Vec text encoder (built separately via `load_text_encoder()` so it can be reused across models). Models are referenced by nickname — a skeleton name (`"core"`, `"g1"`, `"soma"`, resolving to that skeleton's default horizon) or skeleton+horizon (`"core8"`, `"g152"`, `"soma60"`; the smooth-root SOMA variant is `"soma-kimodo"`) — or by full name (`"ARDY-Core-RP-20FPS-Horizon40"`); see [`ardy/model/registry.py`](ardy/model/registry.py). The demo wires this up in [`ModelLoadingMixin.load_model`](scripts/interactive_demo/loading.py).
 - **Generation:** the model runs autoregressively via [`Ardy.autoregressive_step()`](ardy/model/ardy_model.py) — text embeddings and optional kinematic constraints (`motion_mask`/`observed_motion`) in, motion frames out. See it called each step in [`GenerationMixin._generate_step`](scripts/interactive_demo/generation.py), which shows how to encode the text prompt, assemble history + constraint masks, and decode the output back to joint positions with `motion_rep.inverse(...)`.
 
 ---
@@ -242,7 +244,7 @@ Most useful flags:
 
 | Flag | Meaning |
 |------|---------|
-| `--model` | Model nickname `soma`/`core`/`g1` (optionally with horizon, e.g. `soma60`, `core8`) or full folder name. Default: `soma`. |
+| `--model` | Model nickname `soma`/`soma-kimodo`/`core`/`g1` (optionally with horizon, e.g. `soma60`, `core8`) or full folder name. Default: `soma`. |
 | `--duration` | Length in seconds (default 5.0). |
 | `--num_samples` | Number of samples; when >1, writes a numbered folder. |
 | `--seed` | Fix the random seed for reproducible output. |
