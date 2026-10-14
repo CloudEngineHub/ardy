@@ -242,7 +242,7 @@ Most useful flags:
 
 | Flag | Meaning |
 |------|---------|
-| `--model` | Model nickname `soma`/`core`/`g1` (optionally with horizon, e.g. `soma60`, `core8`) or full folder name. Default: `core`. |
+| `--model` | Model nickname `soma`/`core`/`g1` (optionally with horizon, e.g. `soma60`, `core8`) or full folder name. Default: `soma`. |
 | `--duration` | Length in seconds (default 5.0). |
 | `--num_samples` | Number of samples; when >1, writes a numbered folder. |
 | `--seed` | Fix the random seed for reproducible output. |
@@ -262,11 +262,29 @@ ARDY-SOMA-RP-30FPS-Horizon60 is evaluated on the
 with the test suite built for the Ardy motion representation
 (`create_benchmark.py --motion_rep ardy` in the Kimodo repo: GT motions and root constraint targets
 then use the raw hip trajectory, so the Ground Truth root error is 0 by construction). Full-body
-keyframes condition on joint positions only. These numbers are directly comparable to the
-Kimodo-SOMA-RP-ArdyRep-v1.2 rows in the
-[Kimodo benchmark results](https://github.com/nv-tlabs/kimodo/blob/main/docs/source/benchmark/results.md),
-which are evaluated on the same suite (FID is computed between generated and Ground Truth motions;
+keyframes condition on joint positions only. The tables below also include
+[Kimodo-SOMA-RP-ArdyRep-v1.2](https://github.com/nv-tlabs/kimodo), which predicts the same Ardy
+motion representation and is evaluated on the same suite (FID is computed between generated and Ground Truth motions;
 Skate in cm/s; constraint errors in cm).
+
+### Reproducing the evaluation
+
+1. **Build the test suite** (in the [Kimodo repository](https://github.com/nv-tlabs/kimodo), with a
+   local copy of BONES-SEED):
+   ```bash
+   python benchmark/create_benchmark.py path/to/testsuite_ardy \
+       --dataset datasets/bones-seed/soma_uniform --motion_rep ardy
+   ```
+2. **Generate with ARDY** (in this repository):
+   ```bash
+   python scripts/generate_eval.py --benchmark path/to/testsuite_ardy --model soma
+   ```
+3. **Embed and evaluate** (back in the Kimodo repository):
+   ```bash
+   python benchmark/embed_folder.py path/to/testsuite_ardy
+   python benchmark/evaluate_folder.py path/to/testsuite_ardy
+   python benchmark/parse_folder.py path/to/testsuite_ardy
+   ```
 
 ### Text-Following Evaluation
 
@@ -274,15 +292,19 @@ Skate in cm/s; constraint errors in cm).
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | **Content** Ground Truth | 88.55 | 0.000 | 1.849 | 1.000 | 86.26 | 0.000 | 1.789 | 1.000 | 88.21 | 0.000 | 1.711 | 1.000 |
 | **Content** ARDY-SOMA-RP-30FPS-Horizon60 | 77.86 | 0.058 | 2.760 | 0.982 | 63.90 | 0.045 | 2.609 | 0.985 | 76.43 | 0.046 | 2.452 | 0.986 |
+| **Content** Kimodo-SOMA-RP-ArdyRep-v1.2 | 82.12 | 0.033 | 3.625 | 0.980 | 73.06 | 0.035 | 3.404 | 0.984 | 83.78 | 0.034 | 3.172 | 0.983 |
 | **Repetition** Ground Truth | 93.91 | 0.000 | 2.106 | 1.000 | 89.96 | 0.000 | 2.037 | 1.000 | 94.38 | 0.000 | 1.931 | 1.000 |
 | **Repetition** ARDY-SOMA-RP-30FPS-Horizon60 | 80.50 | 0.023 | 3.444 | 0.975 | 64.50 | 0.025 | 3.366 | 0.979 | 81.28 | 0.020 | 3.243 | 0.978 |
+| **Repetition** Kimodo-SOMA-RP-ArdyRep-v1.2 | 85.76 | 0.009 | 4.145 | 0.973 | 74.96 | 0.011 | 3.869 | 0.977 | 87.69 | 0.012 | 3.680 | 0.976 |
 
 ### Constrained Evaluation
 
 |  | With text FB Pos↓ | With text EE Pos↓ | With text 2D Root↓ | With text Pelvis@95% | Without text FB Pos↓ | Without text EE Pos↓ | Without text 2D Root↓ | Without text Pelvis@95% |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | **Content** ARDY-SOMA-RP-30FPS-Horizon60 | 2.77 | 2.73 | 1.47 | 2.83 | 2.69 | 2.53 | 1.32 | 2.49 |
+| **Content** Kimodo-SOMA-RP-ArdyRep-v1.2 | 3.08 | 3.43 | 2.90 | 6.56 | 3.08 | 3.35 | 2.64 | 5.98 |
 | **Repetition** ARDY-SOMA-RP-30FPS-Horizon60 | 2.78 | 2.87 | 1.54 | 3.22 | 2.63 | 2.58 | 1.26 | 2.52 |
+| **Repetition** Kimodo-SOMA-RP-ArdyRep-v1.2 | 3.06 | 3.44 | 2.87 | 7.33 | 3.02 | 3.25 | 2.43 | 5.49 |
 
 ---
 

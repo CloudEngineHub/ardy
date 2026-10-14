@@ -43,7 +43,7 @@ MODELS = {
 }
 MODELS.update({skeleton: MODELS_BY_SKELETON[skeleton][DEFAULT_HORIZON[skeleton]] for skeleton in MODELS_BY_SKELETON})
 
-DEFAULT_MODEL = "core"
+DEFAULT_MODEL = "soma"
 DEFAULT_TEXT_ENCODER_URL = "http://127.0.0.1:9550/"
 
 # --- Aliases kept for imports elsewhere (ardy.model.loading re-exports these) --
