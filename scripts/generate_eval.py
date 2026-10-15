@@ -31,7 +31,7 @@ from ardy.model.registry import resolve_model_name
 from ardy.motion_rep.tools import length_to_mask
 from ardy.postprocess import post_process_motion
 from ardy.skeleton import SOMASkeleton30
-from ardy.tools import seed_everything, to_numpy
+from ardy.tools import disable_tf32, seed_everything, to_numpy
 
 
 def load_json(path):
@@ -40,7 +40,8 @@ def load_json(path):
 
 
 def parse_prompts_from_meta(meta, fps=None):
-    """Parse prompt texts and durations (seconds, or frames when ``fps`` is given) from meta.json."""
+    """Parse prompt texts and durations (seconds, or frames when ``fps`` is given) from
+    meta.json."""
     if "text" in meta and "duration" in meta:
         duration = float(meta["duration"])
         return [meta["text"]], [int(duration * fps) if fps is not None else duration]
@@ -241,6 +242,7 @@ def parse_args():
 
 
 def main():
+    disable_tf32()
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
 
