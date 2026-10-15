@@ -288,6 +288,13 @@ Skate in cm/s; constraint errors in cm).
    python benchmark/parse_folder.py path/to/testsuite_ardy
    ```
 
+**Protocol**: the rows below were generated with batch size 32 and the fp32 LLM2Vec text encoder,
+with full-fp32 matrix multiplications (TF32 off — the pip-install PyTorch default, now enforced by
+`generate_eval.py`). The [Kimodo benchmark results](https://github.com/nv-tlabs/kimodo/blob/main/docs/source/benchmark/results.md)
+use the released protocol instead (batch size 1 with per-case seeding, `bfloat16` text encoder):
+between the two protocols R@3 shifts by about +/-1 while Skate and FID are stable, so rows are
+comparable across the two documents at that granularity.
+
 ### Text-Following Evaluation
 
 |  | Overview R@3↑ | Overview FID↓ | Overview Skate↓ | Overview Contact↑ | Timeline single R@3↑ | Timeline single FID↓ | Timeline single Skate↓ | Timeline single Contact↑ | Timeline multi R@3↑ | Timeline multi FID↓ | Timeline multi Skate↓ | Timeline multi Contact↑ |
@@ -295,18 +302,27 @@ Skate in cm/s; constraint errors in cm).
 | **Content** Ground Truth | 88.55 | 0.000 | 1.849 | 1.000 | 86.26 | 0.000 | 1.789 | 1.000 | 88.21 | 0.000 | 1.711 | 1.000 |
 | **Content** ARDY-SOMA-RP-30FPS-Horizon60 | 77.86 | 0.058 | 2.760 | 0.982 | 63.90 | 0.045 | 2.609 | 0.985 | 76.43 | 0.046 | 2.452 | 0.986 |
 | **Content** Kimodo-SOMA-RP-ArdyRep-v1.2 | 82.12 | 0.033 | 3.625 | 0.980 | 73.06 | 0.035 | 3.404 | 0.984 | 83.78 | 0.034 | 3.172 | 0.983 |
+| **Content** ARDY-SOMA-RP-30FPS-KimodoRep-Horizon60 | 75.57 | 0.066 | 2.230 | 0.984 | 69.68 | 0.040 | 2.215 | 0.985 | 76.68 | 0.051 | 2.052 | 0.987 |
 | **Repetition** Ground Truth | 93.91 | 0.000 | 2.106 | 1.000 | 89.96 | 0.000 | 2.037 | 1.000 | 94.38 | 0.000 | 1.931 | 1.000 |
 | **Repetition** ARDY-SOMA-RP-30FPS-Horizon60 | 80.50 | 0.023 | 3.444 | 0.975 | 64.50 | 0.025 | 3.366 | 0.979 | 81.28 | 0.020 | 3.243 | 0.978 |
 | **Repetition** Kimodo-SOMA-RP-ArdyRep-v1.2 | 85.76 | 0.009 | 4.145 | 0.973 | 74.96 | 0.011 | 3.869 | 0.977 | 87.69 | 0.012 | 3.680 | 0.976 |
+| **Repetition** ARDY-SOMA-RP-30FPS-KimodoRep-Horizon60 | 80.50 | 0.026 | 2.663 | 0.978 | 64.87 | 0.024 | 2.583 | 0.981 | 81.56 | 0.020 | 2.422 | 0.981 |
 
 ### Constrained Evaluation
+
+> The KimodoRep rows are evaluated on the suite built with `--motion_rep kimodo` (root constraints
+> target the smoothed root, on which Ground Truth itself scores ~3.6-3.9 cm), while the other rows
+> use the ardy-rep suite (raw-hips targets, Ground Truth 0 by construction). The 2D Root and
+> Pelvis columns are therefore not comparable between the two suites.
 
 |  | With text FB Pos↓ | With text EE Pos↓ | With text 2D Root↓ | With text Pelvis@95% | Without text FB Pos↓ | Without text EE Pos↓ | Without text 2D Root↓ | Without text Pelvis@95% |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | **Content** ARDY-SOMA-RP-30FPS-Horizon60 | 2.77 | 2.73 | 1.47 | 2.83 | 2.69 | 2.53 | 1.32 | 2.49 |
 | **Content** Kimodo-SOMA-RP-ArdyRep-v1.2 | 3.08 | 3.43 | 2.90 | 6.56 | 3.08 | 3.35 | 2.64 | 5.98 |
+| **Content** ARDY-SOMA-RP-30FPS-KimodoRep-Horizon60 (smooth-root suite) | 2.81 | 2.91 | 4.08 | 6.23 | 2.67 | 2.65 | 3.97 | 6.16 |
 | **Repetition** ARDY-SOMA-RP-30FPS-Horizon60 | 2.78 | 2.87 | 1.54 | 3.22 | 2.63 | 2.58 | 1.26 | 2.52 |
 | **Repetition** Kimodo-SOMA-RP-ArdyRep-v1.2 | 3.06 | 3.44 | 2.87 | 7.33 | 3.02 | 3.25 | 2.43 | 5.49 |
+| **Repetition** ARDY-SOMA-RP-30FPS-KimodoRep-Horizon60 (smooth-root suite) | 2.81 | 3.02 | 3.82 | 6.14 | 2.64 | 2.72 | 3.66 | 5.95 |
 
 ---
 
